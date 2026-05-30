@@ -23,13 +23,17 @@ def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
 
 import os
 
+import os
+
 @st.cache_resource
 def load_weights():
-    w = torch.load(
-    "weights.pth",
-    map_location="cpu"
-)
+    # Get the folder where app.py lives
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    weight_path = os.path.join(base_dir, "weights.pth")
+    
+    w = torch.load(weight_path, map_location="cpu")
     return w["W1"], w["b1"], w["W2"], w["b2"], w["W3"], w["b3"]
+
 W1, b1, W2, b2, W3, b3 = load_weights()
 
 # Page config (unchanged)
