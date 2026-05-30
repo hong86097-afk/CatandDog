@@ -23,11 +23,9 @@ def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
 
 import os
 
-import os
 
 @st.cache_resource
 def load_weights():
-    import os
     
     # Debug — show what files exist
     base_dir = os.path.dirname(os.path.abspath(__file__))
