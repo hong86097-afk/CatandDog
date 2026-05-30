@@ -1,0 +1,230 @@
+import streamlit as st
+import torch
+import numpy as np
+import cv2 as cv
+from PIL import Image
+import random
+
+# Fix randomness
+torch.manual_seed(42)
+np.random.seed(42)
+random.seed(42)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
+# Model (unchanged)
+def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
+    Z1 = torch.matmul(X, W1) + b1
+    A1 = torch.sigmoid(Z1)
+    Z2 = torch.matmul(A1, W2) + b2
+    A2 = torch.sigmoid(Z2)
+    Z3 = torch.matmul(A2, W3) + b3
+    return Z3
+
+@st.cache_resource
+def load_weights():
+    w = torch.load(
+        r"D:\ITC\Year3\I3 s2\Introduction_Machinlearning\Project\project4\weights.pth",
+        map_location="cpu"
+    )
+    return w["W1"], w["b1"], w["W2"], w["b2"], w["W3"], w["b3"]
+
+W1, b1, W2, b2, W3, b3 = load_weights()
+
+# Page config (unchanged)
+st.set_page_config(page_title="Cat vs Dog Classifier", page_icon="🐾", layout="wide")
+
+# CSS
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+* { font-family: 'Inter', sans-serif; }
+
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f3460 100%);
+    min-height: 100vh;
+}
+[data-testid="stSidebar"] {
+    background: #12122a !important;
+    border-right: 1px solid #2a2a4a !important;
+}
+[data-testid="stSidebar"] * { color: #ccccee !important; }
+[data-testid="stSidebar"] .stMarkdown p { color: #8888bb !important; font-size: 0.85rem !important; }
+
+/* All text white */
+h1, h2, h3, p, label, span, div { color: #ffffff; }
+
+/* File uploader */
+[data-testid="stFileUploader"] {
+    background: rgba(26,26,60,0.8) !important;
+    border-radius: 16px !important;
+    border: 2px dashed #4a4a8a !important;
+    padding: 1.5rem !important;
+}
+[data-testid="stFileUploader"] * { color: #aaaacc !important; }
+[data-testid="stFileUploaderDropzoneInstructions"] { color: #7777aa !important; }
+
+/* Image */
+[data-testid="stImage"] img {
+    border-radius: 20px !important;
+    border: 2px solid #3a3a6a !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
+}
+
+/* Metrics */
+[data-testid="stMetric"] {
+    background: rgba(26,26,60,0.8);
+    border-radius: 14px;
+    padding: 1rem 1.2rem !important;
+    border: 1px solid #3a3a6a;
+}
+[data-testid="stMetricLabel"] { color: #8888bb !important; font-size: 0.8rem !important; letter-spacing: 1px; text-transform: uppercase; }
+[data-testid="stMetricValue"] { color: #ffffff !important; font-size: 1.8rem !important; font-weight: 800 !important; }
+
+/* Progress bars */
+[data-testid="stProgress"] > div > div {
+    background: linear-gradient(90deg, #4FC3F7, #a78bfa) !important;
+    border-radius: 10px !important;
+}
+[data-testid="stProgress"] {
+    background: #2a2a4a !important;
+    border-radius: 10px !important;
+    height: 12px !important;
+}
+
+/* Success box */
+[data-testid="stAlert"] {
+    background: rgba(26,26,60,0.9) !important;
+    border-radius: 14px !important;
+    border: 1px solid #3a3a6a !important;
+    color: #ffffff !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* Caption */
+.stMarkdown small, caption { color: #8888bb !important; }
+
+/* Hide branding */
+#MainMenu { visibility: hidden; }
+footer    { visibility: hidden; }
+header    { visibility: hidden; }
+</style>
+""", unsafe_allow_html=True)
+
+# Header (replacing your old h1)
+st.markdown("""
+<div style="text-align:center; padding: 2rem 0 0.5rem 0;">
+    <div style="font-size:3.5rem; font-weight:900;
+                background:linear-gradient(90deg,#4FC3F7,#a78bfa,#f472b6);
+                -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+        Cat vs Dog Classifier
+    </div>
+    <div style="color:#6666aa; font-size:1rem; margin-top:0.4rem; letter-spacing:1px;">
+        Upload an image and let the model decide!
+    </div>
+</div>
+<div style="height:2px; background:linear-gradient(90deg,transparent,#4FC3F7,#a78bfa,transparent);
+            margin: 1rem 2rem 2rem 2rem; border-radius:2px;"></div>
+""", unsafe_allow_html=True)
+
+# Sidebar (unchanged content, better styling)
+st.sidebar.markdown("""
+<div style="text-align:center; padding:1rem 0;">
+    <div style="font-size:2rem;">🐾</div>
+    <div style="font-size:1.1rem; font-weight:700; color:#ffffff;">Settings</div>
+</div>
+<hr style="border-color:#2a2a4a;">
+""", unsafe_allow_html=True)
+st.sidebar.markdown("**About This App**")
+st.sidebar.markdown("""This is a simple image classifier that distinguishes between cats and dogs using a 3-layer ANN built with PyTorch. Upload an image of a cat or dog, and the model will predict which one it is along with confidence scores.""")
+st.sidebar.markdown("<hr style='border-color:#2a2a4a;'>", unsafe_allow_html=True)
+st.sidebar.markdown("**Model Info**")
+st.sidebar.markdown("- Input: 128×128 grayscale")
+st.sidebar.markdown("- Architecture: 3-layer ANN")
+st.sidebar.markdown("- Framework: PyTorch")
+st.sidebar.markdown("<hr style='border-color:#2a2a4a;'>", unsafe_allow_html=True)
+st.sidebar.markdown("**Classes**")
+st.sidebar.markdown("🐱 Class 0 — Cat")
+st.sidebar.markdown("🐶 Class 1 — Dog")
+
+# Upload (unchanged)
+st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+uploaded_file = st.file_uploader("📤 Upload an image", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file).convert("RGB")
+    img_array = np.array(image)
+
+    # Two column layout — image left, results right
+    col_img, col_res = st.columns([1, 1], gap="large")
+
+    with col_img:
+        st.markdown("<div style='font-size:0.8rem; color:#6666aa; letter-spacing:1px; margin-bottom:0.5rem;'>INPUT IMAGE</div>", unsafe_allow_html=True)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    # Preprocess (unchanged)
+    img_gray = cv.cvtColor(img_array, cv.COLOR_RGB2GRAY)
+    img_resized = cv.resize(img_gray, (128, 128)) / 255.0
+    tensor = torch.tensor(img_resized.flatten(), dtype=torch.float32).unsqueeze(0)
+
+    # Predict (unchanged)
+    with torch.no_grad():
+        output = my_ANN(tensor, W1, b1, W2, b2, W3, b3, training=False)
+        _, predicted = torch.max(output, 1)
+        confidence = torch.softmax(output, dim=1)
+
+    # Labels (unchanged)
+    cat_conf = confidence[0][0].item() * 100
+    dog_conf = confidence[0][1].item() * 100
+
+    if predicted.item() == 0:
+        label = "Cat 🐱"
+        conf  = cat_conf
+        color = "#4FC3F7"
+    else:
+        label = "Dog 🐶"
+        conf  = dog_conf
+        color = "#EF9A9A"
+
+    with col_res:
+        st.markdown("<div style='font-size:0.8rem; color:#6666aa; letter-spacing:1px; margin-bottom:0.5rem;'>RESULTS</div>", unsafe_allow_html=True)
+
+        # Metrics (unchanged logic)
+        m1, m2 = st.columns(2)
+        m1.metric("Prediction", label)
+        m2.metric("Confidence", f"{conf:.1f}%")
+
+        # Divider
+        st.markdown("<hr style='border-color:#2a2a4a; margin:1rem 0;'>", unsafe_allow_html=True)
+
+        # Confidence breakdown (unchanged logic)
+        st.markdown("**Confidence Breakdown**")
+        st.markdown(f"<div style='color:#8888bb; font-size:0.85rem; margin-bottom:2px;'>Cat — {cat_conf:.1f}%</div>", unsafe_allow_html=True)
+        st.progress(int(cat_conf))
+        st.markdown(f"<div style='color:#8888bb; font-size:0.85rem; margin-bottom:2px; margin-top:0.5rem;'>Dog — {dog_conf:.1f}%</div>", unsafe_allow_html=True)
+        st.progress(int(dog_conf))
+
+        # Verdict (unchanged logic)
+        st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+        if label.startswith("Dog"):
+            st.success("✅ The model predicts: Dog 🐶")
+        else:
+            st.success("✅ The model predicts: Cat 🐱")
+
+else:
+    # Empty state
+    st.markdown("""
+    <div style="background:rgba(26,26,60,0.6); border:2px dashed #3a3a6a;
+                border-radius:20px; padding:5rem 2rem; text-align:center; margin-top:1rem;">
+        <div style="font-size:4rem;">🐾</div>
+        <div style="color:#5555aa; font-size:1.1rem; margin-top:1rem; font-weight:600;">
+            Upload a JPG or PNG to get started
+        </div>
+        <div style="color:#3a3a6a; font-size:0.85rem; margin-top:0.5rem;">
+            The model will classify your image as Cat or Dog
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
