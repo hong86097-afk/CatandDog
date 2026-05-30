@@ -21,14 +21,13 @@ def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
     Z3 = torch.matmul(A2, W3) + b3
     return Z3
 
+import os
+
 @st.cache_resource
 def load_weights():
-    w = torch.load(
-        r"D:\ITC\Year3\I3 s2\Introduction_Machinlearning\Project\project4\weights.pth",
-        map_location="cpu"
-    )
+    weight_path = os.path.join(os.path.dirname(__file__), "weights.pth")
+    w = torch.load(weight_path, map_location="cpu")
     return w["W1"], w["b1"], w["W2"], w["b2"], w["W3"], w["b3"]
-
 W1, b1, W2, b2, W3, b3 = load_weights()
 
 # Page config (unchanged)
