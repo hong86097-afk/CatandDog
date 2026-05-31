@@ -192,9 +192,9 @@ if uploaded_file is not None:
         label = "Dog 🐶"
         conf  = dog_conf
         color = "#EF9A9A"
-    if conf >= 90:
+    if label == "Dog 🐶" and conf >= 70:
         st.balloons()   # very confident ✅
-    elif conf >= 75:
+    elif label == "Cat 🐱" and conf > 70:
         st.snow()       # somewhat confident ❄️
 
     with col_res:
