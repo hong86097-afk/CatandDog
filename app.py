@@ -11,7 +11,16 @@ np.random.seed(42)
 random.seed(42)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
+import os
 
+@st.cache_resource
+def load_weights():
+    # Debug — show what files exist
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    weight_path = os.path.join(base_dir, "weights.pth")
+    w = torch.load(weight_path, map_location="cpu")
+    return w["W1"], w["b1"], w["W2"], w["b2"], w["W3"], w["b3"]
+W1, b1, W2, b2, W3, b3 = load_weights() 
 # Model (unchanged)
 def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
     Z1 = torch.matmul(X, W1) + b1
@@ -21,22 +30,10 @@ def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
     Z3 = torch.matmul(A2, W3) + b3
     return Z3
 
-import os
 
-@st.cache_resource
-def load_weights():
-    
-    # Debug — show what files exist
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    weight_path = os.path.join(base_dir, "weights.pth")
-    w = torch.load(weight_path, map_location="cpu")
-    return w["W1"], w["b1"], w["W2"], w["b2"], w["W3"], w["b3"]
-W1, b1, W2, b2, W3, b3 = load_weights() 
 
-# Page config (unchanged)
 st.set_page_config(page_title="Cat vs Dog Classifier", page_icon="🐾", layout="wide")
 
-# CSS
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
@@ -218,7 +215,7 @@ if uploaded_file is not None:
             st.success("✅ The model predicts: Cat 🐱")
 
 else:
-    # Empty state
+    
     st.markdown("""
     <div style="background:rgba(26,26,60,0.6); border:2px dashed #3a3a6a;
                 border-radius:20px; padding:5rem 2rem; text-align:center; margin-top:1rem;">
