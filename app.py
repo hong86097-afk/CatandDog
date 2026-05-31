@@ -17,9 +17,14 @@ import os
 def load_weights():
     
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    weight_path = os.path.join(base_dir, "weights.pth")
-    w = torch.load(weight_path, map_location="cpu")
-    return w["W1"], w["b1"], w["W2"], w["b2"], w["W3"], w["b3"] 
+    W1 = torch.tensor(np.load(os.path.join(base_dir, "W1.npy")), dtype=torch.float32)
+    b1 = torch.tensor(np.load(os.path.join(base_dir, "b1.npy")), dtype=torch.float32)
+    W2 = torch.tensor(np.load(os.path.join(base_dir, "W2.npy")), dtype=torch.float32)
+    b2 = torch.tensor(np.load(os.path.join(base_dir, "b2.npy")), dtype=torch.float32)
+    W3 = torch.tensor(np.load(os.path.join(base_dir, "W3.npy")), dtype=torch.float32)
+    b3 = torch.tensor(np.load(os.path.join(base_dir, "b3.npy")), dtype=torch.float32)
+    return W1, b1, W2, b2, W3, b3
+
 # Model (unchanged)
 def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
     Z1 = torch.matmul(X, W1) + b1
