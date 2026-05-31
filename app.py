@@ -23,18 +23,15 @@ def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
 
 import os
 
-
 @st.cache_resource
 def load_weights():
     
     # Debug — show what files exist
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    st.write(f"Looking in: {base_dir}")
-    st.write(f"Files found: {os.listdir(base_dir)}")
-    
     weight_path = os.path.join(base_dir, "weights.pth")
     w = torch.load(weight_path, map_location="cpu")
     return w["W1"], w["b1"], w["W2"], w["b2"], w["W3"], w["b3"]
+W1, b1, W2, b2, W3, b3 = load_weights() 
 
 # Page config (unchanged)
 st.set_page_config(page_title="Cat vs Dog Classifier", page_icon="🐾", layout="wide")
@@ -159,6 +156,7 @@ st.sidebar.markdown("🐶 Class 1 — Dog")
 st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("📤 Upload an image", type=["jpg", "jpeg", "png"])
 
+W1, b1, W2, b2, W3, b3 = load_weights()
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     img_array = np.array(image)
@@ -168,7 +166,7 @@ if uploaded_file is not None:
 
     with col_img:
         st.markdown("<div style='font-size:0.8rem; color:#6666aa; letter-spacing:1px; margin-bottom:0.5rem;'>INPUT IMAGE</div>", unsafe_allow_html=True)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        st.image(image, caption="Uploaded Image", width=600)
 
     # Preprocess (unchanged)
     img_gray = cv.cvtColor(img_array, cv.COLOR_RGB2GRAY)
