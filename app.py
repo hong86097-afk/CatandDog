@@ -192,6 +192,10 @@ if uploaded_file is not None:
         label = "Dog 🐶"
         conf  = dog_conf
         color = "#EF9A9A"
+    if conf >= 90:
+        st.balloons()   # very confident ✅
+    elif conf >= 75:
+        st.snow()       # somewhat confident ❄️
 
     with col_res:
         st.markdown("<div style='font-size:0.8rem; color:#6666aa; letter-spacing:1px; margin-bottom:0.5rem;'>RESULTS</div>", unsafe_allow_html=True)
