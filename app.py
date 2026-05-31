@@ -166,7 +166,7 @@ if uploaded_file is not None:
 
     with col_img:
         st.markdown("<div style='font-size:0.8rem; color:#6666aa; letter-spacing:1px; margin-bottom:0.5rem;'>INPUT IMAGE</div>", unsafe_allow_html=True)
-        st.image(image, caption="Uploaded Image", width=600)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
 
     # Preprocess (unchanged)
     img_gray = cv.cvtColor(img_array, cv.COLOR_RGB2GRAY)
