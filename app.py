@@ -183,24 +183,37 @@ if uploaded_file is not None:
     # Labels (unchanged)
     cat_conf = confidence[0][0].item() * 100
     dog_conf = confidence[0][1].item() * 100
+    top_conf = max(cat_conf, dog_conf)
+    diff_conf = abs(cat_conf - dog_conf)
+    
+    threshold = 70
+    margin = 15
 
-    if predicted.item() == 0:
+
+    
+    if top_conf < threshold or diff_conf < margin:
+        label = "Other ❓"
+        conf = top_conf
+        color = "#a78bfa"
+    elif cat_conf >= dog_conf:
         label = "Cat 🐱"
-        conf  = cat_conf
+        conf = cat_conf
         color = "#4FC3F7"
     else:
         label = "Dog 🐶"
-        conf  = dog_conf
+        conf = dog_conf
         color = "#EF9A9A"
-    if label == "Dog 🐶" and conf >= 70:
-        st.balloons()   # very confident ✅
-    elif label == "Cat 🐱" and conf > 70:
-        st.snow()       # somewhat confident ❄️
+
+    # Fun effects
+    if label == "Dog 🐶" and conf >= threshold:
+        st.balloons()
+    elif label == "Cat 🐱" and conf >= threshold:
+        st.snow()
 
     with col_res:
         st.markdown("<div style='font-size:0.8rem; color:#6666aa; letter-spacing:1px; margin-bottom:0.5rem;'>RESULTS</div>", unsafe_allow_html=True)
 
-        # Metrics (unchanged logic)
+        # Metrics
         m1, m2 = st.columns(2)
         m1.metric("Prediction", label)
         m2.metric("Confidence", f"{conf:.1f}%")
@@ -208,20 +221,21 @@ if uploaded_file is not None:
         # Divider
         st.markdown("<hr style='border-color:#2a2a4a; margin:1rem 0;'>", unsafe_allow_html=True)
 
-        # Confidence breakdown (unchanged logic)
+        # Confidence breakdown
         st.markdown("**Confidence Breakdown**")
         st.markdown(f"<div style='color:#8888bb; font-size:0.85rem; margin-bottom:2px;'>Cat — {cat_conf:.1f}%</div>", unsafe_allow_html=True)
         st.progress(int(cat_conf))
         st.markdown(f"<div style='color:#8888bb; font-size:0.85rem; margin-bottom:2px; margin-top:0.5rem;'>Dog — {dog_conf:.1f}%</div>", unsafe_allow_html=True)
         st.progress(int(dog_conf))
 
-        # Verdict (unchanged logic)
+        # Verdict
         st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
-        if label.startswith("Dog"):
+        if label == "Other ❓":
+            st.success("⚠️ The model is not confident enough. Classified as Other.")
+        elif label.startswith("Dog"):
             st.success("✅ The model predicts: Dog 🐶")
         else:
             st.success("✅ The model predicts: Cat 🐱")
-
 else:
     
     st.markdown("""
