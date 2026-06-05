@@ -15,9 +15,17 @@ import os
 
 @st.cache_resource
 def load_weights():
-    files = ["W1.npy", "b1.npy", "W2.npy", "b2.npy", "W3.npy", "b3.npy"]
-    tensors = [torch.tensor(np.load(f), dtype=torch.float32) for f in files]
-    return tensors  # returns [W1, b1, W2, b2, W3, b3]
+    checkpoint = torch.load("weights.pth", map_location="cpu")
+    W1, b1, W2, b2, W3, b3 = (
+        checkpoint["W1"],
+        checkpoint["b1"],
+        checkpoint["W2"],
+        checkpoint["b2"],
+        checkpoint["W3"],
+        checkpoint["b3"],
+    )
+    return W1, b1, W2, b2, W3, b3
+
 
 
 
