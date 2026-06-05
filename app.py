@@ -14,7 +14,6 @@ torch.backends.cudnn.benchmark = False
 import os
 
 @st.cache_resource
-@st.cache_resource
 def load_weights():
     files = ["W1.npy", "b1.npy", "W2.npy", "b2.npy", "W3.npy", "b3.npy"]
     tensors = [torch.tensor(np.load(f), dtype=torch.float32) for f in files]
