@@ -13,26 +13,29 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 import os
 
-@st.cache_resource(ttl=0)
+@st.cache_resource
 def load_weights():
-    
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    W1 = torch.tensor(np.load(os.path.join(base_dir, "W1.npy")), dtype=torch.float32)
-    b1 = torch.tensor(np.load(os.path.join(base_dir, "b1.npy")), dtype=torch.float32)
-    W2 = torch.tensor(np.load(os.path.join(base_dir, "W2.npy")), dtype=torch.float32)
-    b2 = torch.tensor(np.load(os.path.join(base_dir, "b2.npy")), dtype=torch.float32)
-    W3 = torch.tensor(np.load(os.path.join(base_dir, "W3.npy")), dtype=torch.float32)
-    b3 = torch.tensor(np.load(os.path.join(base_dir, "b3.npy")), dtype=torch.float32)
+    W1 = torch.tensor(np.load("W1.npy"), dtype=torch.float32)
+    b1 = torch.tensor(np.load("b1.npy"), dtype=torch.float32)
+    W2 = torch.tensor(np.load("W2.npy"), dtype=torch.float32)
+    b2 = torch.tensor(np.load("b2.npy"), dtype=torch.float32)
+    W3 = torch.tensor(np.load("W3.npy"), dtype=torch.float32)
+    b3 = torch.tensor(np.load("b3.npy"), dtype=torch.float32)
     return W1, b1, W2, b2, W3, b3
+
+
 
 # Model (unchanged)
 def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
-    Z1 = torch.matmul(X, W1) + b1
-    A1 = torch.sigmoid(Z1)
-    Z2 = torch.matmul(A1, W2) + b2
-    A2 = torch.sigmoid(Z2)
-    Z3 = torch.matmul(A2, W3) + b3
-    return Z3
+    Z1 = torch.relu(X @ W1 + b1)
+    if training:
+        Z1 = torch.nn.functional.dropout(Z1, p=0.5)
+    Z2 = torch.relu(Z1 @ W2 + b2)
+    if training:
+        Z2 = torch.nn.functional.dropout(Z2, p=0.5)
+    Z3 = Z2 @ W3 + b3
+    return Z3   # raw logits
+
 
 
 
