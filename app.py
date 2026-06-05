@@ -26,10 +26,6 @@ def load_weights():
     )
     return W1, b1, W2, b2, W3, b3
 
-
-
-
-
 # Model (unchanged)
 def my_ANN(X, W1, b1, W2, b2, W3, b3, training=False):
     Z1 = torch.relu(X @ W1 + b1)
