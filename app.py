@@ -14,14 +14,11 @@ torch.backends.cudnn.benchmark = False
 import os
 
 @st.cache_resource
+@st.cache_resource
 def load_weights():
-    W1 = torch.tensor(np.load("animal/result/W1.npy"), dtype=torch.float32)
-    b1 = torch.tensor(np.load("animal/result/b1.npy"), dtype=torch.float32)
-    W2 = torch.tensor(np.load("animal/result/W2.npy"), dtype=torch.float32)
-    b2 = torch.tensor(np.load("animal/result/b2.npy"), dtype=torch.float32)
-    W3 = torch.tensor(np.load("animal/result/W3.npy"), dtype=torch.float32)
-    b3 = torch.tensor(np.load("animal/result/b3.npy"), dtype=torch.float32)
-    return W1, b1, W2, b2, W3, b3
+    files = ["W1.npy", "b1.npy", "W2.npy", "b2.npy", "W3.npy", "b3.npy"]
+    tensors = [torch.tensor(np.load(f), dtype=torch.float32) for f in files]
+    return tensors  # returns [W1, b1, W2, b2, W3, b3]
 
 
 
